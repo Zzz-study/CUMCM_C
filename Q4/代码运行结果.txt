@@ -1,0 +1,100 @@
+=== 只处理女胎数据（不平衡改进版） ===
+非整倍体类型分布:
+染色体的非整倍体
+T18       33
+T13T18    11
+T13       10
+T21        9
+T18T21     2
+T13T21     2
+Name: count, dtype: int64
+
+女胎数据形状: (605, 16) | 正类比例: 11.07%
+孕妇数量: 147
+每个孕妇平均检测次数: 4.12
+
+=== 基线模型（Z值规则） ===
+准确率: 0.821  精确率: 0.098  召回率: 0.075  F1: 0.085  敏感度: 0.075  特异度: 0.914
+TP: 5, FP: 46, FN: 62, TN: 492
+
+低质量样本数量: 19 (3.14%)
+移除低质量样本...
+移除后数据形状: (586, 16) | 正类比例: 11.09%
+
+=== 训练含重采样/不平衡集成的模型 ===
+训练集孕妇数量: 117
+测试集孕妇数量: 30
+训练集类别分布: 染色体的非整倍体
+False    405
+True      54
+Name: count, dtype: int64
+测试集类别分布: 染色体的非整倍体
+False    116
+True      11
+Name: count, dtype: int64
+
+训练 LogisticRegression + SMOTE...
+  F1: 0.230 | Sens: 0.636 | Spec: 0.629 | AUC: 0.548 | PR-AUC: 0.145
+
+训练 SVC + SMOTE...
+  F1: 0.171 | Sens: 0.273 | Spec: 0.819 | AUC: 0.565 | PR-AUC: 0.137
+
+训练 GradientBoosting + SMOTE...
+  F1: 0.062 | Sens: 0.091 | Spec: 0.828 | AUC: 0.515 | PR-AUC: 0.096
+
+训练 BalancedRandomForest...
+  F1: 0.143 | Sens: 0.273 | Spec: 0.759 | AUC: 0.583 | PR-AUC: 0.109
+
+训练 LogisticRegression (class_weight=balanced)...
+  F1: 0.222 | Sens: 0.636 | Spec: 0.612 | AUC: 0.533 | PR-AUC: 0.130
+
+训练 BalancedBagging(Depth3-Tree)...
+  F1: 0.200 | Sens: 0.545 | Spec: 0.629 | AUC: 0.611 | PR-AUC: 0.128
+
+🎯 最佳模型: LogisticRegression + SMOTE | F1: 0.230 | AUC: 0.548 | PR-AUC: 0.145
+
+📊 阈值优化(目标敏感度=0.80):
+  最佳阈值: 0.011 | 敏感度: 0.818 | 精确率: 0.075 | F1: 0.137
+  TP: 9, FP: 111, FN: 2, TN: 5
+非整倍体类型分布:
+染色体的非整倍体
+T18       33
+T13T18    11
+T13       10
+T21        9
+T18T21     2
+T13T21     2
+Name: count, dtype: int64
+数据已加载: (586, 16), 正类比例: 11.09%
+Fitting 5 folds for each of 30 candidates, totalling 150 fits
+最佳PR-AUC(交叉验证): 0.44097035244218363
+最佳参数: {'clf__C': np.float64(0.08171653749019032), 'clf__class_weight': 'balanced', 'clf__solver': 'saga', 'smote__k_neighbors': 3}
+
+[LogReg+SMOTE 调参+校准+受约束阈值]
+阈值: 0.015
+召回: 1.000 | 精确率: 0.089 | F1: 0.164
+Spec: 0.034 | PR-AUC: 0.138 | AUC: 0.551
+Maternal BMI average coefficient: -0.180996 (>0 increases risk; <0 decreases; coefficients are in standardized space)
+
+Top-10 coefficients by absolute value:
+                feature      coef
+          ChrX fraction -1.537340
+                    Age -0.519944
+          Chr21 Z-score  0.293474
+   Filtered reads ratio -0.277970
+            Weight (kg) -0.245808
+gestational weeks(week)  0.196816
+        Duplicate ratio -0.183168
+           Maternal BMI -0.180996
+            Height (cm) -0.151954
+        Alignment ratio  0.149464
+✅ Top10系数图已保存为: top10_coefficients.png
+✅ 敏感性曲线已保存为: sensitivity_21.png
+✅ 敏感性曲线已保存为: sensitivity_18.png
+✅ 敏感性曲线已保存为: sensitivity_13.png
+✅ 敏感性曲线已保存为: sensitivity_X.png
+✅ 敏感性曲线已保存为: sensitivity_在参考基因组上比对的比例.png
+✅ 敏感性曲线已保存为: sensitivity_GC含量.png
+✅ 敏感性曲线已保存为: sensitivity_孕妇BMI.png
+
+进程已结束，退出代码为 0
